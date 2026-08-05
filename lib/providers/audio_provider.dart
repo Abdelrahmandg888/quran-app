@@ -117,12 +117,24 @@ class AudioProvider extends ChangeNotifier {
 
     try {
       if (localFilePath != null && localFilePath.isNotEmpty) {
-        await _handler.playFilePath(localFilePath);
+        await _handler.playFilePath(
+          localFilePath,
+          title: title,
+          artist: subtitle,
+          mediaId: localFilePath,
+        );
       } else {
-        await _handler.playUrl(audioUrl, title: title, artist: subtitle);
+        await _handler.playUrl(
+          audioUrl,
+          title: title,
+          artist: subtitle,
+          mediaId: audioUrl,
+        );
       }
     } catch (e) {
       debugPrint('Error playing audio: $e');
+      _isPlaying = false;
+      notifyListeners();
     }
   }
 
@@ -141,9 +153,16 @@ class AudioProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _handler.playUrl(radio.url, title: radio.name, artist: 'إذاعة مباشر');
+      await _handler.playUrl(
+        radio.url,
+        title: radio.name,
+        artist: 'إذاعة مباشر',
+        mediaId: radio.url,
+      );
     } catch (e) {
       debugPrint('Error playing radio: $e');
+      _isPlaying = false;
+      notifyListeners();
     }
   }
 

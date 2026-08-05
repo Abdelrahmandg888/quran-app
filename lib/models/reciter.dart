@@ -20,7 +20,7 @@ class Moshaf {
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       rewayaId: json['rewaya'] ?? 0,
-      server: json['server'] ?? '',
+      server: (json['server'] ?? '').toString().trim(),
       surahTotal: json['surah_total'] ?? 0,
       surahList: json['surah_list'] ?? '',
     );
@@ -45,9 +45,10 @@ class Moshaf {
   }
 
   String getAudioUrl(int surahId) {
+    final cleanServer = server.trim();
     final paddedSurah = surahId.toString().padLeft(3, '0');
-    final cleanServer = server.endsWith('/') ? server : '$server/';
-    return '$cleanServer$paddedSurah.mp3';
+    final formattedServer = cleanServer.endsWith('/') ? cleanServer : '$cleanServer/';
+    return '$formattedServer$paddedSurah.mp3';
   }
 }
 
