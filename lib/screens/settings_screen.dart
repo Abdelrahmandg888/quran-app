@@ -112,7 +112,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'الإصدار 1.0.0 • مدعوم من MP3Quran.net V3 API',
+                        'الإصدار 1.0.2 • مدعوم من MP3Quran.net V3 API',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurface.withOpacity(0.6),
                         ),

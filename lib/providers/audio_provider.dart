@@ -72,6 +72,17 @@ class AudioProvider extends ChangeNotifier {
       _isPlaying = state.playing;
       _isBuffering = state.processingState == ProcessingState.buffering ||
           state.processingState == ProcessingState.loading;
+      
+      // Auto-play next track when current track completes
+      if (state.processingState == ProcessingState.completed) {
+        debugPrint('AudioProvider: Track completed, hasNext=$hasNext');
+        if (hasNext) {
+          playNext();
+        } else {
+          _isPlaying = false;
+        }
+      }
+      
       notifyListeners();
     });
 
@@ -83,6 +94,7 @@ class AudioProvider extends ChangeNotifier {
     _handler.durationStream.listen((dur) {
       if (dur != null) {
         _duration = dur;
+        debugPrint('AudioProvider: Duration updated: $dur');
         notifyListeners();
       }
     });
@@ -99,8 +111,14 @@ class AudioProvider extends ChangeNotifier {
     final subtitle = '${reciter.name} (${moshaf.name})';
     final audioUrl = moshaf.getAudioUrl(surah.id);
 
+    debugPrint('AudioProvider.playSurah: $title');
+    debugPrint('AudioProvider.playSurah: audioUrl=$audioUrl');
+    debugPrint('AudioProvider.playSurah: localFilePath=$localFilePath');
+
     _playlistSurahs = playlistSurahs;
     _currentSurahIndex = playlistSurahs.indexWhere((s) => s.id == surah.id);
+    _position = Duration.zero;
+    _duration = Duration.zero;
 
     _currentItem = PlayableItem(
       type: AudioItemType.surah,
@@ -113,6 +131,7 @@ class AudioProvider extends ChangeNotifier {
       surah: surah,
     );
 
+    _isBuffering = true;
     notifyListeners();
 
     try {
@@ -131,14 +150,18 @@ class AudioProvider extends ChangeNotifier {
           mediaId: audioUrl,
         );
       }
-    } catch (e) {
+      debugPrint('AudioProvider.playSurah: playback started successfully');
+    } catch (e, stackTrace) {
       debugPrint('Error playing audio: $e');
+      debugPrint('Stack trace: $stackTrace');
       _isPlaying = false;
+      _isBuffering = false;
       notifyListeners();
     }
   }
 
   Future<void> playRadio(RadioStation radio) async {
+    debugPrint('AudioProvider.playRadio: ${radio.name}, url=${radio.url}');
     _playlistSurahs = [];
     _currentSurahIndex = -1;
 
@@ -150,6 +173,7 @@ class AudioProvider extends ChangeNotifier {
       radio: radio,
     );
 
+    _isBuffering = true;
     notifyListeners();
 
     try {
@@ -162,6 +186,7 @@ class AudioProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error playing radio: $e');
       _isPlaying = false;
+      _isBuffering = false;
       notifyListeners();
     }
   }
